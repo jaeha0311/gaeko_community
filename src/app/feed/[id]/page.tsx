@@ -250,9 +250,11 @@ export default function FeedDetailPage({ params }: FeedDetailPageProps) {
                   <div key={comment.id} className="flex gap-3 p-4 bg-[#f8f9fa] rounded-lg">
                     <div className="flex-shrink-0">
                       {comment.user.avatar_url ? (
-                        <img
+                        <Image
                           src={comment.user.avatar_url}
                           alt="프로필"
+                          width={32}
+                          height={32}
                           className="w-8 h-8 rounded-full border-2 border-green-200"
                         />
                       ) : (

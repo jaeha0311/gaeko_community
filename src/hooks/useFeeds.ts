@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
   getFeeds, 
@@ -9,7 +10,7 @@ import {
   likeFeed,
   unlikeFeed
 } from '@/lib/api/feeds';
-import { CreateFeedRequest, UpdateFeedRequest } from '@/types/feed';
+import { UpdateFeedRequest } from '@/types/feed';
 
 // Query Keys
 export const feedKeys = {

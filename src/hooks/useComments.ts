@@ -6,7 +6,7 @@ import {
   updateComment, 
   deleteComment 
 } from '@/lib/api/comments';
-import { CreateCommentRequest, UpdateCommentRequest, CommentWithUser } from '@/types/feed';
+import { CreateCommentRequest, UpdateCommentRequest } from '@/types/feed';
 
 // Query Keys
 export const commentKeys = {

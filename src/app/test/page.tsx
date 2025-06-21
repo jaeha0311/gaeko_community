@@ -3,7 +3,7 @@
 import { useFeeds, useCreateFeed } from '@/hooks/useFeeds';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
-import { User } from '@/types/user';
+import { User } from '@supabase/supabase-js';
 
 export default function TestPage() {
   const { data: feeds, isLoading, error } = useFeeds();

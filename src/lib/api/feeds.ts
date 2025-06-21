@@ -214,7 +214,7 @@ export const unlikeFeed = async (feedId: string): Promise<void> => {
     throw new Error('Feed not found');
   }
 
-  const updatedLikes = feed.likes.filter(id => id !== user.id);
+  const updatedLikes = feed.likes.filter((id: string) => id !== user.id);
 
   const { error } = await supabase
     .from('feeds')

@@ -1,6 +1,5 @@
 import Image from "next/image"
 import { Settings, Home, MapPin, Plus, Bell, User } from "lucide-react"
-import { Button } from "@/components/ui/button"
 
 export default function Component() {
     return (
@@ -29,9 +28,9 @@ export default function Component() {
                 <p className="text-gray-500 mb-6">@alex_gecko</p>
 
                 {/* Edit Profile Button */}
-                <Button variant="outline" className="w-full bg-gray-100 text-gray-900 border-gray-200 rounded-full py-3 mb-6">
+                <button className="w-full bg-gray-100 text-gray-900 border border-gray-200 rounded-full py-3 mb-6">
                     Edit Profile
-                </Button>
+                </button>
 
                 {/* Stats */}
                 <div className="flex w-full justify-between mb-6">

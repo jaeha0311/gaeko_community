@@ -1,5 +1,6 @@
 import { ArrowLeft, Home, MapPin, Plus, Bell, User } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import Image from "next/image"
 
 export default function Component() {
     const notifications = {
@@ -71,9 +72,11 @@ export default function Component() {
                         {notifications.today.map((notification) => (
                             <div key={notification.id} className="flex items-center gap-3">
                                 <div className="w-12 h-12 rounded-full overflow-hidden bg-[#f2f2f5] flex-shrink-0">
-                                    <img
+                                    <Image
                                         src={notification.avatar || "/placeholder.svg"}
                                         alt={notification.name}
+                                        width={48}
+                                        height={48}
                                         className="w-full h-full object-cover"
                                     />
                                 </div>
@@ -95,9 +98,11 @@ export default function Component() {
                         {notifications.thisWeek.map((notification) => (
                             <div key={notification.id} className="flex items-center gap-3">
                                 <div className="w-12 h-12 rounded-full overflow-hidden bg-[#f2f2f5] flex-shrink-0">
-                                    <img
+                                    <Image
                                         src={notification.avatar || "/placeholder.svg"}
                                         alt={notification.name}
+                                        width={48}
+                                        height={48}
                                         className="w-full h-full object-cover"
                                     />
                                 </div>

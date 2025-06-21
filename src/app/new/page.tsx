@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import BottomMenu from "@/components/ui/BottomMenu"
 import { useRouter } from "next/navigation"
 import { useState, useRef, useEffect } from "react"
+import Image from "next/image"
 
 export default function Component() {
     const router = useRouter();
@@ -99,9 +100,11 @@ export default function Component() {
                             {/* Selected Content Display */}
                             {selectedImage && (
                                 <div className="relative">
-                                    <img 
+                                    <Image 
                                         src={URL.createObjectURL(selectedImage)} 
                                         alt="Selected" 
+                                        width={400}
+                                        height={128}
                                         className="w-full h-32 object-cover rounded-lg"
                                     />
                                     <Button 

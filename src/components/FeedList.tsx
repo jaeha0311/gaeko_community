@@ -3,6 +3,7 @@
 import { useFeeds, useLikeFeed, useUnlikeFeed } from '@/hooks/useFeeds';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
+import Image from 'next/image';
 
 export function FeedList() {
   const { data: feeds, isLoading, error } = useFeeds();
@@ -51,9 +52,11 @@ export function FeedList() {
             <div key={feed.id} className="bg-white border border-green-200 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow">
               <div className="flex items-center space-x-3 mb-4">
                 {feed.user.avatar_url ? (
-                  <img
+                  <Image
                     src={feed.user.avatar_url}
                     alt="프로필"
+                    width={40}
+                    height={40}
                     className="w-10 h-10 rounded-full border-2 border-green-200"
                   />
                 ) : (
@@ -84,10 +87,12 @@ export function FeedList() {
               {feed.images && feed.images.length > 0 && (
                 <div className="mb-4">
                   {feed.images.map((image, index) => (
-                    <img 
+                    <Image 
                       key={index} 
                       src={image} 
                       alt={`게코 사진 ${index + 1}`}
+                      width={400}
+                      height={256}
                       className="w-full h-64 object-cover rounded-lg"
                     />
                   ))}

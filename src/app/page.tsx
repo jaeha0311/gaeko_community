@@ -4,9 +4,6 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabaseClient';
-import { FeedList } from '@/components/FeedList';
-import { CreateFeedForm } from '@/components/CreateFeedForm';
-import { LogoutButton } from '@/components/LogoutButton';
 import Component from '@/components/pages/home';
 
 export default function HomePage() {
