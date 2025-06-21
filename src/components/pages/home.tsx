@@ -1,19 +1,38 @@
 'use client';
 
-import { Menu, Search } from "lucide-react"
+import { Menu, Search, RefreshCw } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import BottomMenu from "../ui/BottomMenu"
 import { useFeeds } from '@/hooks/useFeeds';
-import { useRouter } from 'next/navigation';
+import { useRef, useEffect } from 'react';
 import FeedItem from '../FeedItem';
+import { usePullToRefresh } from '@/hooks/usePullToRefresh';
+import { useRouteTransition } from '@/hooks/useRouteTransition';
 
 export default function Component() {
-  const router = useRouter();
-  const { data: feeds, isLoading, error } = useFeeds();
+  const { navigate } = useRouteTransition();
+  const { data: feeds, isLoading, error, refetch } = useFeeds();
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const handleFeedClick = (feedId: string) => {
-    router.push(`/feed/${feedId}`);
+    navigate(`/feed/${feedId}`);
   };
+
+  const handleRefresh = async () => {
+    await refetch();
+  };
+
+  const { isRefreshing, pullDistance, attachListeners } = usePullToRefresh({
+    onRefresh: handleRefresh,
+    threshold: 80,
+    resistance: 2.5
+  });
+
+  useEffect(() => {
+    if (scrollContainerRef.current) {
+      return attachListeners(scrollContainerRef.current);
+    }
+  }, [attachListeners]);
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -29,10 +48,42 @@ export default function Component() {
           </Button>
         </header>
 
+        {/* Pull to Refresh Indicator */}
+        {pullDistance > 0 && (
+          <div 
+            className="flex items-center justify-center py-4 bg-[#f8f9fa] border-b border-[#f0f2f5] transition-all duration-200"
+            style={{ 
+              transform: `translateY(${Math.min(pullDistance, 80)}px)`,
+              opacity: Math.min(pullDistance / 80, 1)
+            }}
+          >
+            <div className="flex items-center gap-2 text-[#61758a]">
+              {isRefreshing ? (
+                <>
+                  <RefreshCw className="h-4 w-4 animate-spin" />
+                  <span className="text-sm">새로고침 중...</span>
+                </>
+              ) : (
+                <>
+                  <RefreshCw className="h-4 w-4" />
+                  <span className="text-sm">당겨서 새로고침</span>
+                </>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Scrollable Content Area */}
-        <div className="flex-1 overflow-y-auto px-4 pb-20">
-          {/* Loading State */}
-          {isLoading && (
+        <div 
+          ref={scrollContainerRef}
+          className="flex-1 overflow-y-auto px-4 pb-20"
+          style={{
+            transform: `translateY(${Math.min(pullDistance, 80)}px)`,
+            transition: pullDistance === 0 ? 'transform 0.3s ease-out' : 'none'
+          }}
+        >
+          {/* Loading State - Simplified */}
+          {isLoading && !isRefreshing && (
             <div className="text-center py-12">
               <div className="text-4xl mb-4">🦎</div>
               <p className="text-[#61758a]">게코 친구들의 이야기를 불러오는 중...</p>

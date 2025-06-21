@@ -1,15 +1,16 @@
 'use client';
 
 import Image from "next/image"
-import { Heart, MessageCircle, Bell, Menu, ArrowLeft } from "lucide-react"
+import { Heart, MessageCircle, Bell, Menu, ArrowLeft, RefreshCw } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import BottomMenu from "@/components/ui/BottomMenu"
 import { useFeed } from '@/hooks/useFeeds';
 import { useComments, useCreateComment } from '@/hooks/useComments';
-import { useState, use } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, use, useRef, useEffect } from 'react';
 import { useFeedDate } from '@/hooks/useFeedDate';
 import { useFeedLike } from '@/hooks/useFeedLike';
+import { usePullToRefresh } from '@/hooks/usePullToRefresh';
+import { useRouteTransition } from '@/hooks/useRouteTransition';
 
 interface FeedDetailPageProps {
   params: Promise<{
@@ -18,16 +19,36 @@ interface FeedDetailPageProps {
 }
 
 export default function FeedDetailPage({ params }: FeedDetailPageProps) {
-  const router = useRouter();
+  const { goBack } = useRouteTransition();
   const { id } = use(params);
-  const { data: feed, isLoading: feedLoading, error: feedError } = useFeed(id);
-  const { data: comments, isLoading: commentsLoading } = useComments(id);
+  const { data: feed, isLoading: feedLoading, error: feedError, refetch: refetchFeed } = useFeed(id);
+  const { data: comments, isLoading: commentsLoading, refetch: refetchComments } = useComments(id);
   const createCommentMutation = useCreateComment();
   const [newComment, setNewComment] = useState('');
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // Use custom hooks
   const { formattedDate } = useFeedDate(feed || null);
   const { currentUser, localLikes, isLiked, handleLike } = useFeedLike(feed || null);
+
+  const handleRefresh = async () => {
+    await Promise.all([
+      refetchFeed(),
+      refetchComments()
+    ]);
+  };
+
+  const { isRefreshing, pullDistance, attachListeners } = usePullToRefresh({
+    onRefresh: handleRefresh,
+    threshold: 80,
+    resistance: 2.5
+  });
+
+  useEffect(() => {
+    if (scrollContainerRef.current) {
+      return attachListeners(scrollContainerRef.current);
+    }
+  }, [attachListeners]);
 
   const handleSubmitComment = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,7 +70,7 @@ export default function FeedDetailPage({ params }: FeedDetailPageProps) {
       <div className="min-h-screen bg-gray-100">
         <div className="max-w-[600px] mx-auto bg-[#ffffff] min-h-screen flex flex-col">
           <header className="sticky top-0 z-50 flex items-center justify-between p-4 bg-[#ffffff] border-b border-[#f0f2f5] shadow-sm">
-            <Button variant="ghost" size="icon" className="text-[#121417]" onClick={() => router.back()}>
+            <Button variant="ghost" size="icon" className="text-[#121417]" onClick={goBack}>
               <ArrowLeft className="h-6 w-6" />
             </Button>
             <h1 className="text-[#121417] font-semibold text-lg">게시글</h1>
@@ -72,7 +93,7 @@ export default function FeedDetailPage({ params }: FeedDetailPageProps) {
       <div className="min-h-screen bg-gray-100">
         <div className="max-w-[600px] mx-auto bg-[#ffffff] min-h-screen flex flex-col">
           <header className="sticky top-0 z-50 flex items-center justify-between p-4 bg-[#ffffff] border-b border-[#f0f2f5] shadow-sm">
-            <Button variant="ghost" size="icon" className="text-[#121417]" onClick={() => router.back()}>
+            <Button variant="ghost" size="icon" className="text-[#121417]" onClick={goBack}>
               <ArrowLeft className="h-6 w-6" />
             </Button>
             <h1 className="text-[#121417] font-semibold text-lg">게시글</h1>
@@ -95,7 +116,7 @@ export default function FeedDetailPage({ params }: FeedDetailPageProps) {
       <div className="max-w-[600px] mx-auto bg-[#ffffff] min-h-screen flex flex-col">
         {/* Sticky Header */}
         <header className="sticky top-0 z-50 flex items-center justify-between p-4 bg-[#ffffff] border-b border-[#f0f2f5] shadow-sm">
-          <Button variant="ghost" size="icon" className="text-[#121417]" onClick={() => router.back()}>
+          <Button variant="ghost" size="icon" className="text-[#121417]" onClick={goBack}>
             <ArrowLeft className="h-6 w-6" />
           </Button>
           <h1 className="text-[#121417] font-semibold text-lg">게시글</h1>
@@ -104,8 +125,40 @@ export default function FeedDetailPage({ params }: FeedDetailPageProps) {
           </Button>
         </header>
 
+        {/* Pull to Refresh Indicator */}
+        {pullDistance > 0 && (
+          <div 
+            className="flex items-center justify-center py-4 bg-[#f8f9fa] border-b border-[#f0f2f5] transition-all duration-200"
+            style={{ 
+              transform: `translateY(${Math.min(pullDistance, 80)}px)`,
+              opacity: Math.min(pullDistance / 80, 1)
+            }}
+          >
+            <div className="flex items-center gap-2 text-[#61758a]">
+              {isRefreshing ? (
+                <>
+                  <RefreshCw className="h-4 w-4 animate-spin" />
+                  <span className="text-sm">새로고침 중...</span>
+                </>
+              ) : (
+                <>
+                  <RefreshCw className="h-4 w-4" />
+                  <span className="text-sm">당겨서 새로고침</span>
+                </>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Scrollable Content Area */}
-        <div className="flex-1 overflow-y-auto px-4 pb-20">
+        <div 
+          ref={scrollContainerRef}
+          className="flex-1 overflow-y-auto px-4 pb-20"
+          style={{
+            transform: `translateY(${Math.min(pullDistance, 80)}px)`,
+            transition: pullDistance === 0 ? 'transform 0.3s ease-out' : 'none'
+          }}
+        >
           {/* Feed Post */}
           <div className="mb-6 pt-4">
             {feed.images && feed.images.length > 0 && (
@@ -186,7 +239,7 @@ export default function FeedDetailPage({ params }: FeedDetailPageProps) {
             )}
 
             {/* Comments List */}
-            {commentsLoading ? (
+            {commentsLoading && !isRefreshing ? (
               <div className="text-center py-8">
                 <div className="text-2xl mb-2">💬</div>
                 <p className="text-[#61758a]">댓글을 불러오는 중...</p>
