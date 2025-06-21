@@ -5,6 +5,8 @@ CREATE TABLE IF NOT EXISTS public.users (
   username TEXT UNIQUE,
   full_name TEXT,
   avatar_url TEXT,
+  tag TEXT,
+  description TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );

@@ -5,6 +5,8 @@ CREATE TABLE IF NOT EXISTS public.users (
   username TEXT UNIQUE,
   full_name TEXT,
   avatar_url TEXT,
+  tag TEXT,
+  description TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -110,4 +112,16 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 -- Trigger for new user creation
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
-  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user(); 
+  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
+-- Add tag and description fields to users table
+ALTER TABLE public.users 
+ADD COLUMN IF NOT EXISTS tag TEXT,
+ADD COLUMN IF NOT EXISTS description TEXT;
+
+-- Update existing users to have default values
+UPDATE public.users 
+SET 
+  tag = COALESCE(tag, ''),
+  description = COALESCE(description, '')
+WHERE tag IS NULL OR description IS NULL; 
