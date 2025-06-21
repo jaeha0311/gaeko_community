@@ -1,11 +1,13 @@
 # Geckoland - Feed Application
 
 Next.js와 Supabase를 사용한 소셜 피드 애플리케이션입니다.
+
 모든 디자인과 개발은 AI를 이용해서 진행해 보았습니다.
-디자인 시나리오: 퍼플렉시티[https://www.perplexity.ai/]
-디자인: Stitch[http://stitch.withgoogle.com/] 
-UI 개발: v0[https://v0.dev/]
-로직 개발: Cursor + Figma MCP
+
+- 디자인 시나리오: [퍼플렉시티](https://www.perplexity.ai/)
+- 디자인: [Stitch](http://stitch.withgoogle.com/)
+- UI 컴포넌트 개발: [v0](https://v0.dev/)
+- 로직 개발: Cursor + Figma MCP
 
 
 ## 🚀 기술 스택
