@@ -1,7 +1,7 @@
 import Image from "next/image"
 import { Heart, MessageCircle, Bell, Menu, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import BottomMenu from "./BottomMenu"
+import BottomMenu from "../ui/BottomMenu"
 
 export default function Component() {
   return (
