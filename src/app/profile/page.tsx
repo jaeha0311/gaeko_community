@@ -6,12 +6,14 @@ import { Settings } from "lucide-react"
 import { WithBottomMenu } from "@/components/hoc/withBottomMenu"
 import { useUser } from "@/hooks/useUser"
 import { ProfileEditForm } from "@/components/ProfileEditForm"
+import { SettingsPopup } from "@/components/SettingsPopup"
 import { ProfileLoading } from "@/components/ui/ProfileLoading"
 import { Database } from "@/types/feed"
 
 export default function ProfilePage() {
     const { user, feedsCount, loading, error, updateProfile } = useUser();
     const [showEditForm, setShowEditForm] = useState(false);
+    const [showSettings, setShowSettings] = useState(false);
     const [saving, setSaving] = useState(false);
 
     const handleSaveProfile = async (profileData: Partial<Database['public']['Tables']['users']['Update']>) => {
@@ -72,7 +74,12 @@ export default function ProfilePage() {
                 {/* Header */}
                 <div className="flex items-center justify-between p-4 border-b">
                     <h1 className="text-xl font-semibold">Profile</h1>
-                    <Settings className="w-6 h-6 text-gray-600" />
+                    <button
+                        onClick={() => setShowSettings(true)}
+                        className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+                    >
+                        <Settings className="w-6 h-6 text-gray-600" />
+                    </button>
                 </div>
 
                 {/* Profile Section */}
@@ -166,6 +173,12 @@ export default function ProfilePage() {
                         loading={saving}
                     />
                 )}
+
+                {/* Settings Popup */}
+                <SettingsPopup
+                    isOpen={showSettings}
+                    onClose={() => setShowSettings(false)}
+                />
             </div>
         </WithBottomMenu>
     )
