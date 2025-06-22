@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react';
 import Image from "next/image"
-import { Check, X, LogOut, Edit } from "lucide-react"
+import { LogOut, Edit } from "lucide-react"
 import { WithBottomMenu } from "@/components/hoc/withBottomMenu"
 import { useUser } from "@/hooks/useUser"
 import { ProfileEditForm } from "@/components/ProfileEditForm"
@@ -81,12 +81,6 @@ export default function ProfilePage() {
         setIsEditMode(true);
     };
 
-    const handleHeaderSave = async () => {
-        if (inlineEditRef.current) {
-            await inlineEditRef.current.submit();
-        }
-    };
-
     if (loading) {
         return (
             <WithBottomMenu>
@@ -159,24 +153,7 @@ export default function ProfilePage() {
                 {/* Header */}
                 <div className="flex items-center justify-between p-4 border-b">
                     <h1 className="text-xl font-semibold">Profile</h1>
-                    {isEditMode ? (
-                        <div className="flex space-x-2">
-                            <button
-                                onClick={handleCancelEdit}
-                                disabled={saving}
-                                className="p-1 hover:bg-gray-100 rounded-full transition-colors disabled:opacity-50"
-                            >
-                                <X className="w-5 h-5 text-gray-600" />
-                            </button>
-                            <button
-                                onClick={handleHeaderSave}
-                                disabled={saving}
-                                className="p-1 hover:bg-green-100 rounded-full transition-colors disabled:opacity-50"
-                            >
-                                <Check className="w-5 h-5 text-green-600" />
-                            </button>
-                        </div>
-                    ) : (
+                    {!isEditMode && (
                         <button
                             onClick={handleLogout}
                             className="p-1 hover:bg-red-100 rounded-full transition-colors"

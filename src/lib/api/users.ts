@@ -31,6 +31,11 @@ export const getUserByUsername = async (username: string): Promise<Database['pub
     .single();
 
   if (error) {
+    // PGRST116: "JSON object requested, multiple (or no) rows returned"
+    // This is a normal case when user is not found, not an error
+    if (error.code === 'PGRST116') {
+      return null;
+    }
     throw new Error(`Failed to fetch user: ${error.message}`);
   }
 
