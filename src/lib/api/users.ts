@@ -22,6 +22,21 @@ export const getCurrentUser = async (): Promise<Database['public']['Tables']['us
   return data;
 };
 
+// Get user by username
+export const getUserByUsername = async (username: string): Promise<Database['public']['Tables']['users']['Row'] | null> => {
+  const { data, error } = await supabase
+    .from('users')
+    .select('*')
+    .eq('username', username)
+    .single();
+
+  if (error) {
+    throw new Error(`Failed to fetch user: ${error.message}`);
+  }
+
+  return data;
+};
+
 // Update user profile
 export const updateUserProfile = async (
   profileData: Partial<Database['public']['Tables']['users']['Update']>

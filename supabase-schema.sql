@@ -3,7 +3,6 @@ CREATE TABLE IF NOT EXISTS public.users (
   id UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
   email TEXT UNIQUE NOT NULL,
   username TEXT UNIQUE,
-  full_name TEXT,
   avatar_url TEXT,
   tag TEXT,
   description TEXT,

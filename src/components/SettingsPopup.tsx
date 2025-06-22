@@ -1,16 +1,17 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { LogOut, X } from 'lucide-react';
+import { LogOut, Edit, X } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 import { useRouter } from 'next/navigation';
 
 interface SettingsPopupProps {
   isOpen: boolean;
   onClose: () => void;
+  onEditProfile: () => void;
 }
 
-export function SettingsPopup({ isOpen, onClose }: SettingsPopupProps) {
+export function SettingsPopup({ isOpen, onClose, onEditProfile }: SettingsPopupProps) {
   const popupRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
@@ -25,6 +26,11 @@ export function SettingsPopup({ isOpen, onClose }: SettingsPopupProps) {
     } catch (err) {
       console.error('Logout failed:', err);
     }
+  };
+
+  const handleEditProfile = () => {
+    onEditProfile();
+    onClose();
   };
 
   // Close popup when clicking outside
@@ -83,6 +89,13 @@ export function SettingsPopup({ isOpen, onClose }: SettingsPopupProps) {
 
         {/* Menu Items */}
         <div className="py-1">
+          <button
+            onClick={handleEditProfile}
+            className="w-full flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+          >
+            <Edit className="w-4 h-4 mr-2" />
+            프로필 수정
+          </button>
           <button
             onClick={handleLogout}
             className="w-full flex items-center px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"

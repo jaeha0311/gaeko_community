@@ -8,6 +8,13 @@ export default function AuthCallbackPage() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
 
+  // Generate unique username
+  const generateUniqueUsername = (baseName: string) => {
+    const timestamp = Date.now().toString().slice(-4);
+    const randomSuffix = Math.random().toString(36).substring(2, 6);
+    return `${baseName}_${timestamp}_${randomSuffix}`;
+  };
+
   useEffect(() => {
     const handleAuthCallback = async () => {
       try {
@@ -32,16 +39,36 @@ export default function AuthCallbackPage() {
               .single();
 
             if (!existingUser) {
-              // 새 사용자 프로필 생성
-              const { error: insertError } = await supabase
-                .from('users')
-                .insert({
-                  id: user.id,
-                  email: user.email!,
-                  username: user.user_metadata?.full_name || user.email?.split('@')[0],
-                  full_name: user.user_metadata?.full_name,
-                  avatar_url: user.user_metadata?.avatar_url,
-                });
+              // Generate unique username
+              const baseName = user.email?.split('@')[0] || 'user';
+              let username = generateUniqueUsername(baseName);
+              
+              // Try to insert with generated username, retry if duplicate
+              let insertError;
+              let retryCount = 0;
+              const maxRetries = 5;
+              
+              do {
+                insertError = null;
+                const { error } = await supabase
+                  .from('users')
+                  .insert({
+                    id: user.id,
+                    email: user.email!,
+                    username: username,
+                    avatar_url: user.user_metadata?.avatar_url,
+                  });
+
+                if (error) {
+                  if (error.code === '23505' && error.message.includes('username')) {
+                    // Username already exists, generate new one
+                    username = generateUniqueUsername(baseName);
+                    retryCount++;
+                  } else {
+                    insertError = error;
+                  }
+                }
+              } while (insertError && retryCount < maxRetries);
 
               if (insertError) {
                 console.error('Error creating user profile:', insertError);

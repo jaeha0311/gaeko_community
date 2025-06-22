@@ -17,7 +17,6 @@ export function ProfileEditForm({ user, onSave, onCancel, loading }: ProfileEdit
   const [formData, setFormData] = useState({
     full_name: user.full_name || '',
     username: user.username || '',
-    tag: user.tag || '',
     description: user.description || '',
   });
 
@@ -64,20 +63,11 @@ export function ProfileEditForm({ user, onSave, onCancel, loading }: ProfileEdit
               onChange={(e) => setFormData(prev => ({ ...prev, username: e.target.value }))}
               placeholder="Enter username"
               disabled={loading}
+              readOnly
             />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Tag
-            </label>
-            <Input
-              type="text"
-              value={formData.tag}
-              onChange={(e) => setFormData(prev => ({ ...prev, tag: e.target.value }))}
-              placeholder="Enter a tag (e.g., #geckolover)"
-              disabled={loading}
-            />
+            <p className="text-xs text-gray-400 mt-1">
+              Username can be changed in settings
+            </p>
           </div>
 
           <div>
