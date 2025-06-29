@@ -2,9 +2,12 @@
 
 import { useState, useRef, useImperativeHandle, forwardRef } from 'react';
 import Image from 'next/image';
-import { Check, X, Camera } from 'lucide-react';
+import { Check, X, Camera, MapPin, Loader2, Search } from 'lucide-react';
 import { Database } from '@/types/feed';
 import { getUserByUsername } from '@/lib/api/users';
+import { useLocation } from '@/hooks/useLocation';
+import { KakaoLocationMap } from '@/components/KakaoLocationMap';
+import { AddressSearchModal } from '@/components/AddressSearchModal';
 
 interface InlineProfileEditProps {
   user: Database['public']['Tables']['users']['Row'];
@@ -19,12 +22,21 @@ export interface InlineProfileEditRef {
 
 export const InlineProfileEdit = forwardRef<InlineProfileEditRef, InlineProfileEditProps>(
   ({ user, onSave, onCancel, loading }, ref) => {
+    const { location, loading: locationLoading, error: locationError, getCurrentLocation } = useLocation();
+    const [showAddressSearch, setShowAddressSearch] = useState(false);
+    const [tempLocationData, setTempLocationData] = useState<{
+      latitude: number;
+      longitude: number;
+      locationName: string;
+    } | null>(null);
+    
     const [formData, setFormData] = useState({
       username: user.username || '',
       description: user.description || '',
-      avatar_url: user.avatar_url || '',
+      tag: user.tag || '',
+      location_name: user.location_name || '',
+      avatar_url: user.avatar_url || ''
     });
-    const [avatarFile, setAvatarFile] = useState<File | null>(null);
     const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
     const [usernameError, setUsernameError] = useState('');
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -32,13 +44,30 @@ export const InlineProfileEdit = forwardRef<InlineProfileEditRef, InlineProfileE
     const handleAvatarChange = (event: React.ChangeEvent<HTMLInputElement>) => {
       const file = event.target.files?.[0];
       if (file) {
-        setAvatarFile(file);
         const reader = new FileReader();
         reader.onload = (e) => {
           setAvatarPreview(e.target?.result as string);
         };
         reader.readAsDataURL(file);
       }
+    };
+
+    const handleAddressSearchSelect = (address: string, latitude: number, longitude: number) => {
+      console.log('Address selected:', { address, latitude, longitude });
+      
+      // Create or update location object
+      const newLocation = {
+        latitude,
+        longitude,
+        locationName: address
+      };
+      
+      // Update form data
+      setFormData(prev => ({ ...prev, location_name: address }));
+      
+      // Store the location data for submission
+      setTempLocationData(newLocation);
+      setShowAddressSearch(false);
     };
 
     const handleSubmit = async () => {
@@ -69,14 +98,28 @@ export const InlineProfileEdit = forwardRef<InlineProfileEditRef, InlineProfileE
             return;
           }
         }
-        const updateData: Partial<Database['public']['Tables']['users']['Update']> = {
-          username: formData.username,
-          description: formData.description,
-        };
-        if (avatarFile) {
-          updateData.avatar_url = avatarPreview || formData.avatar_url;
+        
+        const saveData: Partial<Database['public']['Tables']['users']['Update']> = { ...formData };
+        
+        // Include location data if available
+        if (location) {
+          saveData.latitude = location.latitude;
+          saveData.longitude = location.longitude;
+          if (location.locationName) {
+            saveData.location_name = location.locationName;
+          }
         }
-        await onSave(updateData);
+        
+        // Check for temporary location data from address search
+        if (tempLocationData) {
+          saveData.latitude = tempLocationData.latitude;
+          saveData.longitude = tempLocationData.longitude;
+          saveData.location_name = tempLocationData.locationName;
+          setTempLocationData(null);
+        }
+        
+        console.log('Saving profile data:', saveData);
+        await onSave(saveData);
       } catch (err) {
         setUsernameError('프로필 저장 중 오류가 발생했습니다');
         console.error('Failed to update profile:', err);
@@ -87,12 +130,17 @@ export const InlineProfileEdit = forwardRef<InlineProfileEditRef, InlineProfileE
       setFormData({
         username: user.username || '',
         description: user.description || '',
-        avatar_url: user.avatar_url || '',
+        tag: user.tag || '',
+        location_name: user.location_name || '',
+        avatar_url: user.avatar_url || ''
       });
-      setAvatarFile(null);
       setAvatarPreview(null);
       setUsernameError('');
       onCancel();
+    };
+
+    const handleGetLocation = async () => {
+      await getCurrentLocation();
     };
 
     useImperativeHandle(ref, () => ({
@@ -145,7 +193,7 @@ export const InlineProfileEdit = forwardRef<InlineProfileEditRef, InlineProfileE
         </div>
 
         {/* Description Input */}
-        <div className="w-full mb-6">
+        <div className="w-full mb-4">
           <textarea
             value={formData.description}
             onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
@@ -154,6 +202,63 @@ export const InlineProfileEdit = forwardRef<InlineProfileEditRef, InlineProfileE
             rows={3}
             disabled={loading}
           />
+        </div>
+
+        {/* Location Input */}
+        <div className="w-full mb-6">
+          <div className="flex space-x-2">
+            <input
+              type="text"
+              value={formData.location_name}
+              onChange={(e) => setFormData(prev => ({ ...prev, location_name: e.target.value }))}
+              onClick={() => setShowAddressSearch(true)}
+              placeholder="위치를 입력하세요 (클릭하여 검색)"
+              className="flex-1 text-center text-gray-700 bg-transparent border border-gray-300 rounded-lg p-3 focus:border-orange-500 focus:outline-none cursor-pointer"
+              disabled={loading}
+              readOnly
+            />
+            <button
+              type="button"
+              onClick={() => setShowAddressSearch(true)}
+              disabled={loading}
+              className="px-3 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+              title="주소 검색"
+            >
+              <Search className="w-4 h-4" />
+            </button>
+            <button
+              type="button"
+              onClick={handleGetLocation}
+              disabled={loading || locationLoading}
+              className="px-3 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+            >
+              {locationLoading ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <MapPin className="w-4 h-4" />
+              )}
+            </button>
+          </div>
+          {locationError && (
+            <p className="text-red-500 text-sm mt-2 text-center">{locationError}</p>
+          )}
+          {location && (
+            <p className="text-green-600 text-sm mt-2 text-center">
+              위치 업데이트됨: {location.locationName || '주소 정보를 가져올 수 없습니다'}
+            </p>
+          )}
+
+          {/* Location Map Preview */}
+          {(location || tempLocationData || (user.latitude && user.longitude)) && (
+            <div className="mt-3">
+              <KakaoLocationMap
+                latitude={tempLocationData?.latitude || location?.latitude || user.latitude}
+                longitude={tempLocationData?.longitude || location?.longitude || user.longitude}
+                locationName={tempLocationData?.locationName || location?.locationName || user.location_name}
+                className="w-full"
+              />
+            </div>
+          )}
         </div>
 
         {/* Action Buttons */}
@@ -175,6 +280,13 @@ export const InlineProfileEdit = forwardRef<InlineProfileEditRef, InlineProfileE
             {loading ? '저장 중...' : '저장'}
           </button>
         </div>
+
+        {/* Address Search Modal */}
+        <AddressSearchModal
+          isOpen={showAddressSearch}
+          onClose={() => setShowAddressSearch(false)}
+          onAddressSelect={handleAddressSearchSelect}
+        />
       </div>
     );
   }

@@ -6,6 +6,9 @@ export interface User {
   avatar_url: string | null;
   tag: string | null;
   description: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  location_name: string | null;
   created_at: string;
   updated_at: string;
 } 

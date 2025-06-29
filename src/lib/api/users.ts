@@ -93,4 +93,40 @@ export const getUserFeedsCount = async (userId: string): Promise<number> => {
   }
 
   return count || 0;
+};
+
+// Update user location
+export const updateUserLocation = async (
+  latitude: number,
+  longitude: number,
+  locationName?: string
+): Promise<Database['public']['Tables']['users']['Row']> => {
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (!user) {
+    throw new Error('User not authenticated');
+  }
+
+  const updateData: Partial<Database['public']['Tables']['users']['Update']> = {
+    latitude,
+    longitude,
+    updated_at: new Date().toISOString()
+  };
+
+  if (locationName) {
+    updateData.location_name = locationName;
+  }
+
+  const { data, error } = await supabase
+    .from('users')
+    .update(updateData)
+    .eq('id', user.id)
+    .select()
+    .single();
+
+  if (error) {
+    throw new Error(`Failed to update user location: ${error.message}`);
+  }
+
+  return data;
 }; 

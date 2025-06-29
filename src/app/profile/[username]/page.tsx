@@ -2,22 +2,17 @@
 
 import { useState, useEffect } from 'react';
 import Image from "next/image"
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft, MapPin } from "lucide-react"
 import { WithBottomMenu } from "@/components/hoc/withBottomMenu"
 import { getUserByUsername, getUserFeedsCount } from "@/lib/api/users"
 import { ProfileLoading } from "@/components/ui/ProfileLoading"
+import { KakaoLocationMap } from "@/components/KakaoLocationMap"
 import { useRouter } from 'next/navigation';
 import { Database } from '@/types/feed';
 
 type User = Database['public']['Tables']['users']['Row'];
 
-interface UserProfilePageProps {
-  params: {
-    username: string;
-  };
-}
-
-export default function UserProfilePage({ params }: UserProfilePageProps) {
+export default function UserProfilePage({ params }: { params: { username: string } }) {
   const [user, setUser] = useState<User | null>(null);
   const [feedsCount, setFeedsCount] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -158,9 +153,28 @@ export default function UserProfilePage({ params }: UserProfilePageProps) {
 
           {/* Description */}
           {user.description && (
-            <p className="text-center text-gray-700 leading-relaxed mb-6">
+            <p className="text-center text-gray-700 leading-relaxed mb-4">
               {user.description}
             </p>
+          )}
+
+          {/* Location */}
+          {user.location_name && (
+            <div className="flex items-center justify-center text-gray-500 mb-4">
+              <MapPin className="w-4 h-4 mr-1" />
+              <span className="text-sm">{user.location_name}</span>
+            </div>
+          )}
+
+          {/* Location Map */}
+          {(user.latitude && user.longitude) && (
+            <div className="w-full mb-6">
+              <KakaoLocationMap
+                latitude={user.latitude}
+                longitude={user.longitude}
+                locationName={user.location_name}
+              />
+            </div>
           )}
         </div>
 

@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react';
 import Image from "next/image"
-import { LogOut, Edit } from "lucide-react"
+import { LogOut, Edit, MapPin } from "lucide-react"
 import { WithBottomMenu } from "@/components/hoc/withBottomMenu"
 import { useUser } from "@/hooks/useUser"
 import { ProfileEditForm } from "@/components/ProfileEditForm"
@@ -10,6 +10,7 @@ import { SettingsPopup } from "@/components/SettingsPopup"
 import { InlineProfileEdit, InlineProfileEditRef } from "@/components/InlineProfileEdit"
 import { UsernameSetup } from "@/components/UsernameSetup"
 import { ProfileLoading } from "@/components/ui/ProfileLoading"
+import { KakaoLocationMap } from "@/components/KakaoLocationMap"
 import { Database } from "@/types/feed"
 import { supabase } from '@/lib/supabaseClient';
 import { useRouter } from 'next/navigation';
@@ -217,9 +218,28 @@ export default function ProfilePage() {
 
                         {/* Description */}
                         {user.description && (
-                            <p className="text-center text-gray-700 leading-relaxed mb-6">
+                            <p className="text-center text-gray-700 leading-relaxed mb-4">
                                 {user.description}
                             </p>
+                        )}
+
+                        {/* Location */}
+                        {user.location_name && (
+                            <div className="flex items-center justify-center text-gray-500 mb-4">
+                                <MapPin className="w-4 h-4 mr-1" />
+                                <span className="text-sm">{user.location_name}</span>
+                            </div>
+                        )}
+
+                        {/* Location Map */}
+                        {(user.latitude && user.longitude) && (
+                            <div className="w-full mb-6">
+                                <KakaoLocationMap
+                                    latitude={user.latitude}
+                                    longitude={user.longitude}
+                                    locationName={user.location_name}
+                                />
+                            </div>
                         )}
                     </div>
                 )}

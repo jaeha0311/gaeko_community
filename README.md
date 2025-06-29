@@ -9,7 +9,6 @@ Next.js와 Supabase를 사용한 소셜 피드 애플리케이션입니다.
 - UI 컴포넌트 개발: [v0](https://v0.dev/)
 - 로직 개발: Cursor + Figma MCP
 
-
 ## 🚀 기술 스택
 
 - **Frontend**: Next.js 15, React 19, TypeScript
@@ -73,9 +72,20 @@ npm install
 ```env
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+
+# Kakao Maps API (선택사항)
+NEXT_PUBLIC_KAKAO_APP_KEY=your_kakao_javascript_key_here
 ```
 
-### 3. Supabase 데이터베이스 설정
+### 3. 카카오 지도 API 설정 (선택사항)
+
+카카오 지도 기능을 사용하려면:
+
+1. [카카오 개발자 센터](https://developers.kakao.com/)에서 Maps API 키 발급
+2. `KAKAO_MAPS_SETUP.md` 파일 참조하여 상세 설정
+3. 환경변수에 API 키 추가
+
+### 4. Supabase 데이터베이스 설정
 
 1. Supabase 프로젝트를 생성하세요
 2. SQL Editor에서 `supabase-schema.sql` 파일의 내용을 실행하세요
@@ -167,6 +177,8 @@ npm run dev
 - ✅ 댓글 시스템
 - ✅ 좋아요 기능
 - ✅ 이미지 업로드 지원
+- ✅ 사용자 프로필 관리
+- ✅ 위치 기반 서비스 (카카오 지도)
 - ✅ 실시간 캐싱 (TanStack Query)
 - ✅ 타입 안전성 (TypeScript)
 - ✅ 반응형 디자인 (Tailwind CSS)
