@@ -76,20 +76,34 @@ export const useLocation = (): UseLocationReturn => {
       });
 
       const { latitude, longitude } = position.coords;
-      
       // Get location name from coordinates
       const locationName = await getLocationName(latitude, longitude);
-      
       setLocation({
         latitude,
         longitude,
         locationName
       });
-    } catch (err) {
-      const errorMessage = err instanceof GeolocationPositionError 
-        ? getGeolocationErrorMessage(err.code)
-        : 'Failed to get current location';
-      setError(errorMessage);
+    } catch (err: any) {
+      // kCLErrorLocationUnknown 또는 POSITION_UNAVAILABLE(1) 에러 시 기본 위치로 fallback
+      const isUnknownLocation =
+        (err instanceof GeolocationPositionError && err.code === 1) ||
+        (typeof err?.message === 'string' && err.message.includes('kCLErrorLocationUnknown'));
+      if (isUnknownLocation) {
+        const fallbackLat = 37.553881;
+        const fallbackLng = 126.970488;
+        const locationName = await getLocationName(fallbackLat, fallbackLng);
+        setLocation({
+          latitude: fallbackLat,
+          longitude: fallbackLng,
+          locationName
+        });
+        setError('위치 정보를 가져올 수 없어 기본 위치로 이동합니다.');
+      } else {
+        const errorMessage = err instanceof GeolocationPositionError 
+          ? getGeolocationErrorMessage(err.code)
+          : 'Failed to get current location';
+        setError(errorMessage);
+      }
     } finally {
       setLoading(false);
     }
